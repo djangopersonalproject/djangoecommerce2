@@ -14,8 +14,8 @@ urlpatterns = [
 
     path('buy/', views.buy_now, name='buy-now'),
 
-    path('profile/', views.profile, name='profile'),
-
+    # path('profile/', views.profile, name='profile'),
+    path('profile/',views.ProfileView.as_view(),name='profile'),
     path('address/', views.address, name='address'),
 
     path('orders/', views.orders, name='orders'),
@@ -41,7 +41,7 @@ urlpatterns = [
         form_class=MySetPasswordForm
     ), name='password_reset_confirm'),
 
-    path('password-reset-complete/',auth_views.PasswordResetCompleteView.as_view(template_name='app/password_reset_confirm.html'),name="password_reset_confirm"),
+    path('password-reset-complete/',auth_views.PasswordResetCompleteView.as_view(template_name='app/password_reset_complete.html'),name="password_reset_complete"),
 
     path('registration/',views.CustomerRegistrationView.as_view(),name='customerregistration'),
 

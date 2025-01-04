@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views import View
 from .models import Customer,Product,Cart,OrderPlaced
-from .forms import CustomerRegistrationForm
+from .forms import CustomerRegistrationForm,CustomerProfileForm
 from django.contrib import messages
+
+
 # def home(request):
 #  return render(request, 'app/home.html')
 
@@ -73,3 +75,21 @@ class CustomerRegistrationView(View):
   return render(request,'app/customerregistration.html',{'form':form})
 def checkout(request):
  return render(request, 'app/checkout.html')
+
+class ProfileView(View):
+  def get(self,request):
+    form = CustomerProfileForm()
+    return render(request,'app/profile.html',{'form':form,'active':'btn-primary'})
+  
+  def post(self,request):
+    form = CustomerProfileForm(request.POST)
+    if form.is_valid():
+      usr=request.user
+      name=form.cleaned_data['name']
+      locality = form.cleaned_data['locality']
+      city = form.cleaned_data['city']
+      state = form.cleaned_data['state']
+      zipcode = form.cleaned_data['zipcode']
+      reg=Customer(user=usr,name=name,locality=locality,city=city,state=state,zipcode=zipcode)
+      messages.success(request,'Congratulations!! Profile Update Successfully')
+    return render(request,'app/profile.html',{'form':form,'active':'btn-primary'})

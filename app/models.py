@@ -100,4 +100,3 @@ class OrderPlaced(models.Model):
     ordered_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50,choices=STATUS_CHOICES,default='Pending')
 
-
