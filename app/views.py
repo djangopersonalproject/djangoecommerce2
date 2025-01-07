@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.views import View
 from .models import Customer,Product,Cart,OrderPlaced
 from .forms import CustomerRegistrationForm,CustomerProfileForm
@@ -23,11 +23,21 @@ class ProductView(View):
 class ProductDetailView(View):
   def get(self,request,pk):
    product = Product.objects.get(pk=pk)
-   return render(request,
-                 'app/productdetail.html',{'product':product})
+   return render(request,'app/productdetail.html',{'product':product})
 
 def add_to_cart(request):
- return render(request, 'app/addtocart.html')
+  user= request.user
+  product_id = request.GET.get('prod_id')
+  product = Product.objects.get(id=product_id)
+  # print("product_id==>",product_id)
+  Cart(user=user,product=product).save()
+  return redirect('/cart')
+ 
+def show_cart(request):
+  if request.user.is_authenticated:
+    user=request.user
+    cart = Cart.objects.filter(user=user)
+    return render(request,'app/addtocart.html',{'carts':cart})
 
 def buy_now(request):
  return render(request, 'app/buynow.html')
@@ -36,7 +46,9 @@ def profile(request):
  return render(request, 'app/profile.html')
 
 def address(request):
- return render(request, 'app/address.html')
+  add = Customer.objects.filter(user=request.user)
+  print("add==>",add.query)
+  return render(request,'app/address.html',{'add':add,"active":"btn-primary"})
 
 def orders(request):
  return render(request, 'app/orders.html')
@@ -91,5 +103,6 @@ class ProfileView(View):
       state = form.cleaned_data['state']
       zipcode = form.cleaned_data['zipcode']
       reg=Customer(user=usr,name=name,locality=locality,city=city,state=state,zipcode=zipcode)
+      reg.save()
       messages.success(request,'Congratulations!! Profile Update Successfully')
     return render(request,'app/profile.html',{'form':form,'active':'btn-primary'})
