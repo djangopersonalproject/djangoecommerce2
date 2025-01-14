@@ -7,6 +7,13 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+# extra lines
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .paypal_utils import get_access_token
+import requests
+# extra lines
+
 # def home(request):
 #  return render(request, 'app/home.html')
 
@@ -201,6 +208,43 @@ def payment_done(request):
     c.delete()
   return redirect("orders")
 
+# extra codes
+@csrf_exempt
+def create_order(request):
+    if request.method == 'POST':
+        access_token = get_access_token()
+        url = "https://api-m.sandbox.paypal.com/v2/checkout/orders"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        data = {
+            "intent": "CAPTURE",
+            "purchase_units": [{
+                "amount": {
+                    "currency_code": "USD",
+                    "value": "100.00"
+                }
+            }]
+        }
+        response = requests.post(url, headers=headers, json=data)
+        return JsonResponse(response.json())
+
+@csrf_exempt
+def capture_order(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('orderID')
+        access_token = get_access_token()
+        url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        response = requests.post(url, headers=headers)
+        return JsonResponse(response.json())
+      
+#extra codes
+
 @method_decorator(login_required,name='dispatch')
 class ProfileView(View):
   def get(self,request):
@@ -220,3 +264,4 @@ class ProfileView(View):
       reg.save()
       messages.success(request,'Congratulations!! Profile Update Successfully')
     return render(request,'app/profile.html',{'form':form,'active':'btn-primary'})
+  

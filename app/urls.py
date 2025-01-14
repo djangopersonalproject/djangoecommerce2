@@ -31,6 +31,11 @@ urlpatterns = [
     
     path('paymentdone/', views.payment_done, name='paymentdone'),
     
+    # extra codes
+    path('create-order/', views.create_order, name='create_order'),
+    path('capture-order/', views.capture_order, name='capture_order'),
+    # extra codes
+    
     path('accounts/login/',auth_views.LoginView.as_view(template_name='app/login.html',authentication_form=LoginForm),name='login'),
 
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),

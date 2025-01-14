@@ -15,8 +15,8 @@
           <p class="fw-bold text-dark">Price: {{item.total_cost}}</p>
         </div>
       </div>
-      {% endfor %}
-      <p class="fw-bold">Total Cost + Rs. 70 = {{totalamount}}</p>
+    {% endfor %}
+    <p class="fw-bold">Total Cost + Rs. 70 = {{totalamount}}</p>
     <small class="text-white">Term and Condition: Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia, ullam saepe! Iure optio repellat dolor velit, minus rem. Facilis cumque neque numquam laboriosam, accusantium adipisci nisi nihil in et quis?</small>
   </div>
   <div class="col-sm-4 offset-sm-1">
@@ -37,14 +37,62 @@
           <label class="form-check-label fw-bold text-white" for="custadd{{forloop.counter}}">
             Address: {{forloop.counter}}</label>
         </div>
-        
-        <div class="text-end">
-          <button type="submit" class="btn btn-warning mt-3 px-5 fw-bold text-dark">Continue</button>
-        </div>
-        <br>
-         {% endfor %}
-      </form>
-    </div>
+      {% endfor %}
+      <div class="text-end">
+        <div id="paypal-button-container"></div>
+      </div>
+      <br>
+    </form>
   </div>
+ </div>
 </div>
 {% endblock main-content %}
+
+{% block payment-gateway %}
+ <!-- Include the PayPal JavaScript SDK -->
+ <script src="https://www.paypal.com/sdk/js?client-id=AYlokKpuubb3q2nuuljFig5GQQpIpBND7vgJcYfEjE4RQuWVIo5cZ1HAno57BQcfkIUyfyxly9TlgsOz&currency=USD"></script>
+
+ <script>
+     // Render the PayPal button into #paypal-button-container
+     paypal.Buttons({
+
+         // Call your server to set up the transaction
+         createOrder: function(data, actions) {
+             return fetch('/create-order/', {
+                 method: 'post',
+                 headers: {
+                     'content-type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                     // Pass any data needed to create the order
+                 })
+             }).then(function(res) {
+                 return res.json();
+             }).then(function(orderData) {
+                 return orderData.id;
+             });
+         },
+
+         // Finalize the transaction on the server after payer approval
+         onApprove: function(data, actions) {
+             return fetch('/capture-order/', {
+                 method: 'post',
+                 headers: {
+                     'content-type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                     orderID: data.orderID
+                 })
+             }).then(function(res) {
+                 return res.json();
+             }).then(function(orderData) {
+                 // Successful capture! For demo purposes:
+                 console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                 var transaction = orderData.purchase_units[0].payments.captures[0];
+                 alert('Transaction ' + transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+             });
+         }
+
+     }).render('#paypal-button-container');
+ </script>
+{% endblock payment-gateway %}
