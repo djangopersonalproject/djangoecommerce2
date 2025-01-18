@@ -120,9 +120,10 @@ STATIC_URL = 'static/'
 MEDIA_URL='/media/'
 MEDIA_ROOT=BASE_DIR/'media'
 LOGIN_REDIRECT_URL ='/profile/'
-LOGOUT_REDIRECT_URL ='/login/'
+LOGOUT_REDIRECT_URL ='/login/'  
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
+SESSION_ENGINE ='django.contrib.sessions.backends.db'
+SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
