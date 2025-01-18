@@ -22,7 +22,7 @@
   <div class="col-sm-4 offset-sm-1">
     <h4 class="text-white">Select Shipping Address</h4>
     <hr>
-    <form action="/paymentdone">
+    <form action="/paymentdone" id="myform">
       {% for ad in add %}
       <div class="card">
         <div class="card-body">
@@ -50,49 +50,26 @@
 
 {% block payment-gateway %}
  <!-- Include the PayPal JavaScript SDK -->
- <script src="https://www.paypal.com/sdk/js?client-id=AYlokKpuubb3q2nuuljFig5GQQpIpBND7vgJcYfEjE4RQuWVIo5cZ1HAno57BQcfkIUyfyxly9TlgsOz&currency=USD"></script>
+ <script src="https://www.paypal.com/sdk/js?client-id=AQEa344sGmK85qV9xkSrIZh5z46TZcaPmICys_1XbvGdv0VQd-MAILnNQf-6Mrx5-OukJtodfGS5Cw1x&currency=USD"></script>
 
  <script>
-     // Render the PayPal button into #paypal-button-container
-     paypal.Buttons({
-
-         // Call your server to set up the transaction
-         createOrder: function(data, actions) {
-             return fetch('/create-order/', {
-                 method: 'post',
-                 headers: {
-                     'content-type': 'application/json'
-                 },
-                 body: JSON.stringify({
-                     // Pass any data needed to create the order
-                 })
-             }).then(function(res) {
-                 return res.json();
-             }).then(function(orderData) {
-                 return orderData.id;
-             });
-         },
-
-         // Finalize the transaction on the server after payer approval
-         onApprove: function(data, actions) {
-             return fetch('/capture-order/', {
-                 method: 'post',
-                 headers: {
-                     'content-type': 'application/json'
-                 },
-                 body: JSON.stringify({
-                     orderID: data.orderID
-                 })
-             }).then(function(res) {
-                 return res.json();
-             }).then(function(orderData) {
-                 // Successful capture! For demo purposes:
-                 console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                 var transaction = orderData.purchase_units[0].payments.captures[0];
-                 alert('Transaction ' + transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-             });
-         }
-
-     }).render('#paypal-button-container');
- </script>
+  paypal.Buttons({
+      createOrder:function(data,actions){
+          return actions.order.create({
+              purchase_units:[{
+                  amount:{
+                      value:'{{totalamount}}'
+                  }
+              }]
+          })
+      },
+      // Finalize the transaction
+      onApprove:function(data,actions){
+          return actions.order.capture().then(function(details){
+              alert('Transaction completed by'+ details.payer.name.given_name + '!');
+document.getElementById("myform").submit()
+})
+      }
+  }).render('#paypal-button-container');
+</script>
 {% endblock payment-gateway %}
